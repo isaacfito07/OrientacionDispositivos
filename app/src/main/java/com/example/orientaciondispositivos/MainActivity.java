@@ -2,12 +2,16 @@ package com.example.orientaciondispositivos;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -19,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     @Override
@@ -53,16 +58,35 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             prevY = curY;
             prevZ = curZ;
             last_update = current_time;
+
+            ((TextView) findViewById(R.id.txtAccX)).setText("Acelerómetro X: " + curX);
+            ((TextView) findViewById(R.id.txtAccY)).setText("Acelerómetro Y: " + curY);
+            ((TextView) findViewById(R.id.txtAccZ)).setText("Acelerómetro Z: " + curZ);
         }
 
-        ((TextView) findViewById(R.id.txtAccX)).setText("Acelerómetro X: " + curX);
-        ((TextView) findViewById(R.id.txtAccY)).setText("Acelerómetro Y: " + curY);
-        ((TextView) findViewById(R.id.txtAccZ)).setText("Acelerómetro Z: " + curZ);
+
 
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
+        List<Sensor> sensors = sm.getSensorList(Sensor.TYPE_ACCELEROMETER);
+        if (sensors.size() > 0) {
+            sm.registerListener(this, sensors.get(0), SensorManager.SENSOR_DELAY_GAME);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sm.unregisterListener(this);
+        super.onStop();
     }
 }
